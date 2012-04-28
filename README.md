@@ -31,7 +31,9 @@ Technical stack
 Application code will have two parts: core and web site. Core will contain code to manage the data.
 Web site will use core to display and update the data.
 
-Web site will be mostly server side code, with added JS goodies where needed.
+Web site has two parts
+* User interface will be mostly server side code, with added JS goodies where needed.
+* REST api available for everything
 
 First steps
 ===========
