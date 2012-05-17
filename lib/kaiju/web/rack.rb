@@ -29,10 +29,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 # License applies to the class below
 class RackServer
 
-  def run!(app=nil, &block)
-    if block && app.nil?
-      app = Rack::Builder.new(&block)
-    end
+  def run!(app)
     handler = detect_rack_handler
     handler_name = handler.name.gsub(/.*::/, '')
     handler.run app do |server|

@@ -29,9 +29,8 @@ Kaiju has a built in web server. It can be controlled with following commands
   #{shell_command} stop - stops Kaiju web server
 EOF
 }
-
-  def start_server
-    RackServer.new.run! do
+  def kaiju_app
+    Rack::Builder.new do
       map "/" do
         run MyApp
       end
@@ -40,6 +39,10 @@ EOF
         run MyApp2
       end
     end
+  end
+
+  def start_server
+    RackServer.new.run! kaiju_app
   end
 
   # Finds matching command and displays its help
