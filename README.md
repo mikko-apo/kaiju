@@ -24,7 +24,7 @@ Technical stack
 * Ruby - Simple and powerful language
 * Json - Data objects stored as json
 * Git - The command line tool
-* Some Ruby web framework
+* Some Ruby web framework like Sinatra
 * Some javascript libraries: jquery, rx
 * Sass, Coffeescript
 

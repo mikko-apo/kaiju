@@ -1,0 +1,10 @@
+#!/usr/bin/env ruby
+
+# -*- encoding: utf-8 -*-
+
+$:.unshift File.join(File.dirname(File.dirname(__FILE__)),"lib")
+
+require 'rubygems'
+require 'kaiju_all.rb'
+
+KaijuShellCommand.new.execute(ARGV)

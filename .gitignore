@@ -16,3 +16,18 @@ tmp
 .yardoc
 _yardoc
 doc/
+
+# rake, rspec, yard
+doc
+coverage
+pkg
+
+# yard
+.yardoc
+
+# idea
+.rakeTasks
+spec/coverage
+
+# osx
+.DS_Store
