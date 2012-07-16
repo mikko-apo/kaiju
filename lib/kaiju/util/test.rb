@@ -49,7 +49,7 @@ class Tester
     if src
       catcher = ExceptionCatcher.new
       catcher.catch do
-        copy_visible_files(src, dest)
+        Tester.copy_visible_files(src, dest)
       end
       # if there is a problem copying files, cleanup and raise original exception
       if catcher.exceptions?
@@ -165,7 +165,7 @@ class Tester
   # @param [String] src source directory path
   # @param [String] dest destination directory path
   # @return [String] dest directory
-  def copy_visible_files(src, dest)
+  def self.copy_visible_files(src, dest)
     Dir.glob(File.join(src, "**/*")).each do |file_src|
       file_path = file_src[src.size+1..-1]
       if File.file?(file_src)
@@ -184,7 +184,7 @@ class Tester
   # @return [String] dest_root directory
   # @example
   #   src = @tester.write_files(@tester.tmpdir, "file.txt" => "aa", "dir/my.txt" => "bb")
-  def write_files(dest_root, files={})
+  def self.write_files(dest_root, files={})
     files.each_pair { |file_path, content|
       dir = File.dirname(file_path)
       if dir != "."
@@ -193,6 +193,57 @@ class Tester
       File.safe_write(File.join(dest_root, file_path), content)
     }
     dest_root
+  end
+
+  # Verifies that files exist in target directory.
+  # If files or directories are missing, contents are wrong, type is wrong or there are unwanted files raises an exception.
+  # @param [String] source_root target directory path
+  # @param [List] args containing check_for_extra_files and files map
+  #   * check_for_extra_files, by default verify_files does not check if there are other files or directories. If set to true, raises an exception if there are other files
+  #   * files, a map of file paths and contents. If file name ends with "/" or file contents are nil, path is a directory
+  # @return [Boolean] true if there were no errors
+  # @example
+  #   @tester.verify_files(tmpdir, "file.txt" => "aa", "dir/my.txt" => "bb", "dir" => nil) # other files are ok
+  #   @tester.verify_files(tmpdir, true, "file.txt" => "aa", "dir/my.txt" => "bb", "dir" => nil) # other files will fail
+  def self.verify_files(source_root, *args)
+    check_for_extra_files, files = args
+    if files.nil? && check_for_extra_files.kind_of?(Hash)
+      files = check_for_extra_files
+      check_for_extra_files = nil
+    end
+    files.each_pair do |file, contents|
+      src_file = File.join(source_root, file)
+      is_dir = file.end_with?("/") || contents.nil?
+      if !File.exists?(src_file)
+        raise "#{ is_dir ? "Directory" : "File"} '#{src_file}' is missing!"
+      end
+      if is_dir != File.directory?(src_file)
+        raise "Existing #{ is_dir ? "file" : "directory"} '#{src_file}' should be a #{ is_dir ? "directory" : "file"}!"
+      end
+      if !is_dir
+        if IO.read(src_file) != contents
+          raise "File '#{src_file}' is broken!"
+        end
+      end
+    end
+    if check_for_extra_files
+      files_and_dirs = {}
+      files.each_pair do |k,v|
+        file_arr=k.split("/")
+        c = file_arr.size
+        while c > 0
+          c -= 1
+          files_and_dirs[File.join(source_root, file_arr)]=true
+          file_arr.delete_at(-1)
+        end
+      end
+      Dir.glob(File.join(source_root,"**/*")).each do |file|
+        if !files_and_dirs[file]
+          is_dir = File.directory?(file)
+          raise "#{ is_dir ? "Directory" : "File"} '#{file}' exists, but it should not exist!"
+        end
+      end
+    end
   end
 
   # Dummy IO class that implements stream methods
