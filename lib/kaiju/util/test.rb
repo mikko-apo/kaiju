@@ -212,17 +212,32 @@ class Tester
       check_for_extra_files = nil
     end
     files.each_pair do |file, contents|
-      src_file = File.join(source_root, file)
+      file_path = File.join(source_root, file)
       is_dir = file.end_with?("/") || contents.nil?
-      if !File.exists?(src_file)
-        raise "#{ is_dir ? "Directory" : "File"} '#{src_file}' is missing!"
+      if !File.exists?(file_path)
+        raise "#{ is_dir ? "Directory" : "File"} '#{file_path}' is missing!"
       end
-      if is_dir != File.directory?(src_file)
-        raise "Existing #{ is_dir ? "file" : "directory"} '#{src_file}' should be a #{ is_dir ? "directory" : "file"}!"
+      if is_dir != File.directory?(file_path)
+        raise "Existing #{ is_dir ? "file" : "directory"} '#{file_path}' should be a #{ is_dir ? "directory" : "file"}!"
       end
       if !is_dir
-        if IO.read(src_file) != contents
-          raise "File '#{src_file}' is broken!"
+        file_contents = IO.read(file_path)
+        [contents].flatten.each do |o|
+          if o.kind_of?(Regexp)
+            if !file_contents.match(o)
+              raise "File '#{file_path}' does not match regexp #{o.inspect}, file contents: '#{file_contents}'"
+            end
+          elsif o.kind_of?(String)
+            if file_contents != o
+              raise "File '#{file_path}' is broken! Expected '#{o}' but was '#{file_contents}'"
+            end
+          elsif o.kind_of?(Proc)
+            if !o.call(file_contents)
+              raise "File '#{file_path}' did not pass test!"
+            end
+          else
+            raise "Unsupported checker! File '#{file_path}' object: #{o.inspect}"
+          end
         end
       end
     end
@@ -239,8 +254,7 @@ class Tester
       end
       Dir.glob(File.join(source_root,"**/*")).each do |file|
         if !files_and_dirs[file]
-          is_dir = File.directory?(file)
-          raise "#{ is_dir ? "Directory" : "File"} '#{file}' exists, but it should not exist!"
+          raise "#{ File.directory?(file) ? "Directory" : "File"} '#{file}' exists, but it should not exist!"
         end
       end
     end

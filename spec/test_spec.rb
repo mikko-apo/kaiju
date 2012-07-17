@@ -81,7 +81,11 @@ describe Tester do
     Tester.verify_files(tmp, files)
     Tester.verify_files(tmp, "b/" => nil)
     Tester.verify_files(tmp, "b" => nil)
-    lambda {Tester.verify_files(tmp, files.merge("a" => "bar"))}.should raise_error "File '#{tmp}/a' is broken!"
+    Tester.verify_files(tmp, "a" => /1/)
+    Tester.verify_files(tmp, "a" => lambda { |s| s == "1"} )
+    lambda {Tester.verify_files(tmp, files.merge("a" => "bar"))}.should raise_error "File '#{tmp}/a' is broken! Expected 'bar' but was '1'"
+    lambda {Tester.verify_files(tmp, "a" => /2/)}.should raise_error "File '#{tmp}/a' does not match regexp /2/, file contents: '1'"
+    lambda {Tester.verify_files(tmp, "a" => lambda { |s| s == "2"} )}.should raise_error "File '#{tmp}/a' did not pass test!"
     lambda {Tester.verify_files(tmp, files.merge("foo" => "bar"))}.should raise_error "File '#{tmp}/foo' is missing!"
     lambda {Tester.verify_files(tmp, "c/" => nil)}.should raise_error "Directory '#{tmp}/c/' is missing!"
     lambda {Tester.verify_files(tmp, "b" => "foo")}.should raise_error "Existing directory '#{tmp}/b' should be a file!"
