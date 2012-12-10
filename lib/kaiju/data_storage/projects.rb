@@ -1,0 +1,2 @@
+class ProjectList < JSONListFile
+end
