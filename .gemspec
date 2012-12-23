@@ -13,7 +13,6 @@ Gem::Specification.new do |s|
   end
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["Mikko Apo"]
-  s.email       = ["mikko.apo@gmail.com"]
   s.homepage    = "https://github.com/mikko-apo/kaiju"
   s.summary     = "Simple issue tracking system"
   s.description = "Kaiju aims to provide powerful core features and easy to use user interface for issue tracking"
